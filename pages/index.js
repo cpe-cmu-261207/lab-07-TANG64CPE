@@ -8,11 +8,72 @@ import {
 } from "@tabler/icons";
 
 export default function Home() {
-  const deleteTodo = (idx) => {};
+  let p = 0;
+  let c = 0;
+  const [todoInput, setTodoInput] = useState("");
+  const [todos, setTodos] = useState([]);
 
-  const markTodo = (idx) => {};
+  useEffect(() => {
+    const todosStr = localStorage.getItem("react-todos");
+    if (todosStr === null) setTodos([]);
+    else setTodos(JSON.parse(todosStr));
+  }, []);
 
-  const moveUp = (idx) => {};
+  const saveTodos = () => {
+    const todosStr = JSON.stringify(todos);
+    localStorage.setItem("react-todos", todosStr);
+  };
+
+  const [isFirstRun, setisFirstRun] = useState(true);
+  useEffect(() => {
+    if (isFirstRun) {
+      setisFirstRun(false);
+      return;
+    }
+    saveTodos();
+  }, [todos]);
+
+  const addTodo = () => {
+    const newTodos = [{ title: todoInput, state: false }, ...todos];
+    setTodos(newTodos);
+    setTodoInput("");
+  };
+
+  const emtpyTodo = () => {
+    alert("Todo cannot be empty");
+  };
+
+  const status = () => {
+    todos.map((todo) => {
+      if (todo.state === false) {
+        p = p + 1;
+      } else if (todo.state === true) {
+        c = c + 1;
+      }
+    });
+  };
+
+  const deleteTodo = (idx) => {
+    todos.splice(idx, 1);
+    const newTodos = [...todos];
+    setTodos(newTodos);
+  };
+
+  const markTodo = (idx) => {
+    todos[idx].state = !todos[idx].state;
+    setTodos([...todos]);
+  };
+
+  const moveUp = (idx) => {
+    const index = items.findIndex((x) => x.id === id);
+    const newItems = [
+      items[index],
+      ...items.slice(0, index - 1),
+      ...items.slice(index + 1),
+    ];
+    setItems(newItems);
+    completed(id);
+  };
 
   const moveDown = (idx) => {};
 
@@ -26,42 +87,47 @@ export default function Home() {
         </p>
         {/* Input */}
         <input
+          onChange={(event) => {
+            setTodoInput(event.target.value);
+          }}
+          value={todoInput}
           className="form-control mb-1 fs-4"
           placeholder="insert todo here..."
+          onKeyUp={(e) => {
+            if (e.key === "Enter") {
+              if (todoInput !== "") {
+                return addTodo();
+              } else if (todoInput === "") {
+                return emtpyTodo();
+              }
+            }
+          }}
         />
-        {/* Todos */}
-        {/* Example 1 */}
-        <div className="border-bottom p-1 py-2 fs-2 d-flex gap-2">
-          <span className="me-auto">Todo</span>
-        </div>
-        {/* Example 2 */}
-        <div className="border-bottom p-1 py-2 fs-2 d-flex gap-2">
-          <span className="me-auto">Todo with buttons</span>
 
-          <button className="btn btn-success">
-            <IconCheck />
-          </button>
-          <button className="btn btn-secondary">
-            <IconArrowUp />
-          </button>
-          <button className="btn btn-secondary">
-            <IconArrowDown />
-          </button>
-          <button className="btn btn-danger">
-            <IconTrash />
-          </button>
-        </div>
+        {/* Todos */}
+        <ul>
+          {todos.map((todo, i) => (
+            <Todo
+              title={todo.title}
+              key={i}
+              completed={todo.state}
+              onDelete={() => deleteTodo(i)}
+              onMark={() => markTodo(i)}
+            />
+          ))}
+        </ul>
+        {status()}
 
         {/* summary section */}
         <p className="text-center fs-4">
-          <span className="text-primary">All (2) </span>
-          <span className="text-warning">Pending (2) </span>
-          <span className="text-success">Completed (0)</span>
+          <span className="text-primary">All {"(" + todos.length + ")"} </span>
+          <span className="text-warning">Pending {"(" + p + ")"} </span>
+          <span className="text-success">Completed {"(" + c + ")"} </span>
         </p>
 
         {/* Made by section */}
         <p className="text-center mt-3 text-muted fst-italic">
-          made by Chayanin Suatap 12345679
+          made by Natsuphat Thaumpan 640612184
         </p>
       </div>
     </div>
